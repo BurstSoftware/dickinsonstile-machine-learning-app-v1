@@ -41,19 +41,102 @@ if df is not None:
     # Data Overview Page
     if page == "Data Overview":
         st.header("Data Overview")
-        st.write("Explore the Dickinsonstile.com Flooring Data 2025 dataset.")
-        
-        # Display raw data
+        st.write("Explore the Dickinsonstile.com Flooring Data 2025 dataset with filtering options.")
+
+        # Raw Data with Filtering
         st.subheader("Raw Data")
-        st.dataframe(df)
+        st.write("Filter rows and columns to display specific data.")
+
+        # Column selection
+        all_columns = df.columns.tolist()
+        selected_columns = st.multiselect("Select columns to display", all_columns, default=all_columns)
         
-        # Basic statistics
+        # Row filtering (e.g., by City, Market Tier, or numeric ranges)
+        st.write("Filter rows by specific criteria:")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            filter_city = st.multiselect("Filter by City", options=df["City"].unique(), default=[])
+        with col2:
+            filter_market_tier = st.multiselect("Filter by Market Tier", options=df["Market Tier"].unique(), default=[])
+        
+        # Numeric filters
+        st.write("Filter by numeric ranges:")
+        col3, col4 = st.columns(2)
+        with col3:
+            pop_min, pop_max = st.slider("Population range", 
+                                         min_value=int(df["Population"].min()), 
+                                         max_value=int(df["Population"].max()), 
+                                         value=(int(df["Population"].min()), int(df["Population"].max())))
+        with col4:
+            home_sales_min, home_sales_max = st.slider("Annual Home Sales range", 
+                                                       min_value=int(df["Annual Home Sales"].min()), 
+                                                       max_value=int(df["Annual Home Sales"].max()), 
+                                                       value=(int(df["Annual Home Sales"].min()), int(df["Annual Home Sales"].max())))
+        
+        # Apply filters
+        filtered_df = df.copy()
+        if filter_city:
+            filtered_df = filtered_df[filtered_df["City"].isin(filter_city)]
+        if filter_market_tier:
+            filtered_df = filtered_df[filtered_df["Market Tier"].isin(filter_market_tier)]
+        filtered_df = filtered_df[(filtered_df["Population"].between(pop_min, pop_max)) & 
+                                 (filtered_df["Annual Home Sales"].between(home_sales_min, home_sales_max))]
+        
+        # Display filtered data
+        if selected_columns:
+            st.dataframe(filtered_df[selected_columns])
+        else:
+            st.warning("Please select at least one column to display.")
+
+        # Basic Statistics with Filtering
         st.subheader("Basic Statistics")
-        st.write(df.describe())
-        
-        # Missing values
+        st.write("View statistics for selected columns and filtered rows.")
+
+        # Use the same filtered dataframe
+        if selected_columns:
+            numeric_columns = filtered_df[selected_columns].select_dtypes(include=[np.number]).columns
+            if numeric_columns.empty:
+                st.warning("No numeric columns selected for statistics.")
+            else:
+                st.write(filtered_df[numeric_columns].describe())
+        else:
+            st.warning("Please select columns to view statistics.")
+
+        # Missing Values with City Selection and Filtering
         st.subheader("Missing Values")
-        st.write(df.isnull().sum())
+        st.write("Select a city to fill missing values and filter the missing values table.")
+
+        # City selection for filling missing values
+        selected_city = st.selectbox("Select a city to fill missing values", options=["None"] + df["City"].tolist())
+        
+        # Create a copy for missing value operations
+        df_missing = df.copy()
+        
+        if selected_city != "None":
+            # Get the selected city's row
+            city_data = df[df["City"] == selected_city].iloc[0]
+            # Fill missing values with city's values (for numeric columns)
+            for col in df_missing.select_dtypes(include=[np.number]).columns:
+                df_missing[col].fillna(city_data[col], inplace=True)
+            # Fill categorical columns with city's values
+            for col in df_missing.select_dtypes(include=[object]).columns:
+                df_missing[col].fillna(city_data[col], inplace=True)
+        
+        # Calculate missing values
+        missing_values = df_missing.isnull().sum().reset_index()
+        missing_values.columns = ["Column", "Missing Count"]
+        
+        # Filter missing values table
+        st.write("Filter missing values table:")
+        missing_columns = st.multiselect("Select columns for missing values", all_columns, default=all_columns)
+        missing_threshold = st.slider("Filter rows by minimum missing count", 0, int(missing_values["Missing Count"].max()), 0)
+        
+        # Apply filters to missing values
+        filtered_missing = missing_values[missing_values["Column"].isin(missing_columns)]
+        filtered_missing = filtered_missing[filtered_missing["Missing Count"] >= missing_threshold]
+        
+        st.dataframe(filtered_missing)
 
     # Visualizations Page
     elif page == "Visualizations":
