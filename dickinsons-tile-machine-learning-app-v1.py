@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 st.set_page_config(page_title="Dickinsonstile.com ML Home Data App Version 2025", layout="wide")
 
 # Title and description
-st.title("Dickinsonstile.com Flooring Data 2025")
+st.title("Dickinsonstile.com ML Home Data App Version 2025")
 st.markdown("""
 This application provides insights into flooring market data across various cities in Florida. 
 Explore the dataset, visualize trends, and predict the number of current contractors using a machine learning model.
