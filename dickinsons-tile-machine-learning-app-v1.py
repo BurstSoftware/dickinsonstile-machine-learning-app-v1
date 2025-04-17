@@ -88,58 +88,6 @@ if df is not None:
         else:
             st.warning("Please select at least one column to display.")
 
-        # Basic Statistics with Filtering
-        st.subheader("Basic Statistics")
-        st.write("View statistics for selected columns and filtered rows.")
-
-        if selected_columns:
-            numeric_columns = filtered_df[selected_columns].select_dtypes(include=[np.number]).columns
-            if numeric_columns.empty:
-                st.warning("No numeric columns selected for statistics.")
-            else:
-                st.write(filtered_df[numeric_columns].describe())
-        else:
-            st.warning("Please select columns to view statistics.")
-
-        # Missing Values with City Selection and Filtering
-        st.subheader("Missing Values")
-        st.write("Select a city to fill missing values and filter the missing values table.")
-
-        # City selection for filling missing values
-        selected_city = st.selectbox("Select a city to fill missing values", options=["None"] + df["City"].tolist())
-        
-        # Create a copy for missing value operations
-        df_missing = df.copy()
-        
-        if selected_city != "None":
-            # Get the selected city's row
-            city_data = df[df["City"] == selected_city].iloc[0]
-            # Fill missing values with city's values
-            for col in df_missing.select_dtypes(include=[np.number]).columns:
-                df_missing[col].fillna(city_data[col], inplace=True)
-            for col in df_missing.select_dtypes(include=[object]).columns:
-                df_missing[col].fillna(city_data[col], inplace=True)
-        
-        # Calculate missing values
-        missing_values = df_missing.isnull().sum().reset_index()
-        missing_values.columns = ["Column", "Missing Count"]
-        
-        # Filter missing values table
-        st.write("Filter missing values table:")
-        missing_columns = st.multiselect("Select columns for missing values", all_columns, default=all_columns)
-        
-        # Check for missing values to configure slider
-        max_missing = int(missing_values["Missing Count"].max())
-        filtered_missing = missing_values[missing_values["Column"].isin(missing_columns)]
-        
-        if max_missing > 0:
-            missing_threshold = st.slider("Filter rows by minimum missing count", 0, max_missing, 0)
-            filtered_missing = filtered_missing[filtered_missing["Missing Count"] >= missing_threshold]
-            st.dataframe(filtered_missing)
-        else:
-            st.info("No missing values in the dataset.")
-            st.dataframe(filtered_missing)
-
     # Visualizations Page
     elif page == "Visualizations":
         st.header("Visualizations")
@@ -211,7 +159,7 @@ if df is not None:
 
     # Footer
     st.markdown("---")
-    st.markdown("Built with ❤️ by Streamlit | Data Source: [Dickinsonstile.com Flooring Data 2025 on GitHub](https://github.com/BurstSoftware/dickinsonstile-machine-learning-app-v1)")
+    st.markdown("Built By Burst Software Development | Website: [Dickinsonstile.com](https://www.dickinsonstile.com)")
 
 else:
     st.error("Failed to load data. Please check the GitHub URL or try again later.")
