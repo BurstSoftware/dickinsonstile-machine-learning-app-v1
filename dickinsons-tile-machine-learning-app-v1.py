@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Set page configuration
-st.set_page_config(page_title="Dickinsonstile.com Machine Learning App 2025", layout="wide")
+st.set_page_config(page_title="Dickinsonstile.com Flooring Data 2025", layout="wide")
 
 # Title and description
 st.title("Dickinsonstile.com Flooring Data 2025")
@@ -23,8 +23,8 @@ Data is sourced from a GitHub-hosted CSV file.
 # Load data from GitHub
 @st.cache_data
 def load_data():
-    # Replace with your GitHub raw URL after creating the repository
-    github_raw_url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY/main/data/flooring_data_2025.csv"
+    # Replace with your actual GitHub raw URL
+    github_raw_url = "https://raw.githubusercontent.com/YOUR_USERNAME/dickinsonstile-machine-learning-app-v1/main/data/flooring_data_2025.csv"
     try:
         data = pd.read_csv(github_raw_url)
         return data
@@ -138,7 +138,7 @@ if df is not None:
 
     # Footer
     st.markdown("---")
-    st.markdown("Built By Burst Software Development | Website: [Dickinsonstile.com](https://www.dickinsonstile.com")
+    st.markdown(f"Built with ❤️ by Streamlit | Data Source: [Dickinsonstile.com Flooring Data 2025 on GitHub](https://github.com/YOUR_USERNAME/dickinsonstile-machine-learning-app-v1)")
 
 else:
     st.error("Failed to load data. Please check the GitHub URL or try again later.")
