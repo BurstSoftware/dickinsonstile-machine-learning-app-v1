@@ -23,8 +23,7 @@ Data is sourced from a GitHub-hosted CSV file.
 # Load data from GitHub
 @st.cache_data
 def load_data():
-    # Replace with your actual GitHub raw URL
-    github_raw_url = "https://raw.githubusercontent.com/YOUR_USERNAME/dickinsonstile-machine-learning-app-v1/main/data/flooring_data_2025.csv"
+    github_raw_url = "https://raw.githubusercontent.com/BurstSoftware/dickinsonstile-machine-learning-app-v1/main/data/flooring_data_2025.csv"
     try:
         data = pd.read_csv(github_raw_url)
         return data
@@ -138,7 +137,7 @@ if df is not None:
 
     # Footer
     st.markdown("---")
-    st.markdown(f"Built with ❤️ by Streamlit | Data Source: [Dickinsonstile.com Flooring Data 2025 on GitHub](https://github.com/YOUR_USERNAME/dickinsonstile-machine-learning-app-v1)")
+    st.markdown("Built with ❤️ by Streamlit | Data Source: [Dickinsonstile.com Flooring Data 2025 on GitHub](https://github.com/BurstSoftware/dickinsonstile-machine-learning-app-v1)")
 
 else:
     st.error("Failed to load data. Please check the GitHub URL or try again later.")
