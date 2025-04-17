@@ -51,10 +51,9 @@ if df is not None:
         all_columns = df.columns.tolist()
         selected_columns = st.multiselect("Select columns to display", all_columns, default=all_columns)
         
-        # Row filtering (e.g., by City, Market Tier, or numeric ranges)
+        # Row filtering
         st.write("Filter rows by specific criteria:")
         col1, col2 = st.columns(2)
-        
         with col1:
             filter_city = st.multiselect("Filter by City", options=df["City"].unique(), default=[])
         with col2:
@@ -93,7 +92,6 @@ if df is not None:
         st.subheader("Basic Statistics")
         st.write("View statistics for selected columns and filtered rows.")
 
-        # Use the same filtered dataframe
         if selected_columns:
             numeric_columns = filtered_df[selected_columns].select_dtypes(include=[np.number]).columns
             if numeric_columns.empty:
@@ -116,10 +114,9 @@ if df is not None:
         if selected_city != "None":
             # Get the selected city's row
             city_data = df[df["City"] == selected_city].iloc[0]
-            # Fill missing values with city's values (for numeric columns)
+            # Fill missing values with city's values
             for col in df_missing.select_dtypes(include=[np.number]).columns:
                 df_missing[col].fillna(city_data[col], inplace=True)
-            # Fill categorical columns with city's values
             for col in df_missing.select_dtypes(include=[object]).columns:
                 df_missing[col].fillna(city_data[col], inplace=True)
         
@@ -130,33 +127,35 @@ if df is not None:
         # Filter missing values table
         st.write("Filter missing values table:")
         missing_columns = st.multiselect("Select columns for missing values", all_columns, default=all_columns)
-        missing_threshold = st.slider("Filter rows by minimum missing count", 0, int(missing_values["Missing Count"].max()), 0)
         
-        # Apply filters to missing values
+        # Check for missing values to configure slider
+        max_missing = int(missing_values["Missing Count"].max())
         filtered_missing = missing_values[missing_values["Column"].isin(missing_columns)]
-        filtered_missing = filtered_missing[filtered_missing["Missing Count"] >= missing_threshold]
         
-        st.dataframe(filtered_missing)
+        if max_missing > 0:
+            missing_threshold = st.slider("Filter rows by minimum missing count", 0, max_missing, 0)
+            filtered_missing = filtered_missing[filtered_missing["Missing Count"] >= missing_threshold]
+            st.dataframe(filtered_missing)
+        else:
+            st.info("No missing values in the dataset.")
+            st.dataframe(filtered_missing)
 
     # Visualizations Page
     elif page == "Visualizations":
         st.header("Visualizations")
         st.write("Visualize key metrics from the dataset.")
         
-        # Plot 1: Average Home Value by Market Tier
         st.subheader("Average Home Value by Market Tier")
         fig1 = px.bar(df, x="Market Tier", y="Avg. Home Value", color="Market Tier", 
                       title="Average Home Value by Market Tier")
         st.plotly_chart(fig1)
         
-        # Plot 2: Population vs. Annual Home Sales
         st.subheader("Population vs. Annual Home Sales")
         fig2 = px.scatter(df, x="Population", y="Annual Home Sales", color="Market Tier", 
                           size="Avg. Home Value", hover_data=["City"], 
                           title="Population vs. Annual Home Sales")
         st.plotly_chart(fig2)
         
-        # Plot 3: Number of Contractors by City
         st.subheader("Number of Current Contractors by City")
         fig3, ax = plt.subplots()
         sns.barplot(x="Number Of Current Contractor", y="City", hue="Market Tier", data=df, ax=ax)
@@ -168,7 +167,6 @@ if df is not None:
         st.header("Predict Number of Current Contractors")
         st.write("Use a Random Forest model to predict the number of current contractors based on input features.")
         
-        # Preprocess data
         df_ml = df.copy()
         le = LabelEncoder()
         df_ml["Market Tier"] = le.fit_transform(df_ml["Market Tier"])
@@ -177,14 +175,11 @@ if df is not None:
         X = df_ml[features]
         y = df_ml["Number Of Current Contractor"]
         
-        # Split data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        # Train model
         model = RandomForestRegressor(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Model evaluation
         y_pred = model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
@@ -192,7 +187,6 @@ if df is not None:
         st.write(f"Mean Squared Error: {mse:.2f}")
         st.write(f"R² Score: {r2:.2f}")
         
-        # User input for prediction
         st.subheader("Make a Prediction")
         population = st.number_input("Population", min_value=0, value=50000)
         num_homes = st.number_input("Number of Homes", min_value=0, value=20000)
@@ -201,10 +195,8 @@ if df is not None:
         avg_home_price = st.number_input("Average Home Price", min_value=0, value=310000)
         annual_home_sales = st.number_input("Annual Home Sales", min_value=0, value=1000)
         
-        # Encode market tier
         market_tier_encoded = le.transform([market_tier])[0]
         
-        # Make prediction
         input_data = np.array([[population, num_homes, market_tier_encoded, avg_home_value, 
                                 avg_home_price, annual_home_sales]])
         prediction = model.predict(input_data)
@@ -212,7 +204,6 @@ if df is not None:
         if st.button("Predict"):
             st.success(f"Predicted Number of Current Contractors: {int(prediction[0])}")
         
-        # Feature importance
         st.subheader("Feature Importance")
         importance = pd.DataFrame({"Feature": features, "Importance": model.feature_importances_})
         fig4 = px.bar(importance, x="Feature", y="Importance", title="Feature Importance in Prediction")
