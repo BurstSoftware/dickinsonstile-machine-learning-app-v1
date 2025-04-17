@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Set page configuration
-st.set_page_config(page_title="Dickinsonstile.com Flooring Data 2025", layout="wide")
+st.set_page_config(page_title="Dickinsonstile.com ML Home Data App Version 2025", layout="wide")
 
 # Title and description
 st.title("Dickinsonstile.com Flooring Data 2025")
